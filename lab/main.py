@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os,time,cv2
 from threading import Thread, Semaphore,Lock
 
