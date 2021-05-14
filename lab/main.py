@@ -4,7 +4,7 @@ from threading import Thread, Semaphore,Lock
 count = 0
 fileName = '../clip.mp4'
 
-def extract_frames(in_q, out_q):
+def extract_frames(in_q):
     vidcap = cv2.VideoCapture(fileName)
     
     while True:
@@ -28,7 +28,6 @@ def convert_frames(in_q, out_q):
 def disply_frames(out_q):
     while True:
         frame = out_q.pop()
-    # display the image in a window called "video" and wait 42ms
         cv2.imshow('Video', frame)
         if cv2.waitKey(42) and 0xFF == ord("q"):
             break
@@ -40,7 +39,7 @@ class PCQueue():
     def init(self, cap):
         self.full = Semaphore(0)
         self.empty = Semaphore(cap)
-        self.buffer = list() 
+        self.queue = list() 
         self.lock = Lock()
 
     def push(self, frame):
@@ -53,7 +52,7 @@ class PCQueue():
     def pop(self):
         self.full.acquire()
         self.lock.acquire()
-        frame = self.buffer.pop(0)
+        frame = self.queue.pop(0)
         self.lock.release()
         self.empty.release()
         return frame
@@ -62,3 +61,11 @@ class PCQueue():
 
 inQ = PCQueue(10)
 outQ = PCQueue(10)
+
+t1 = Thread(target=extract_frames, args=(inQ,))
+t2 = Thread(target=convert_frames, args= (inQ,outQ))
+t3 = Thread(target=disply_frames, args=(outQ,))
+
+t1.start()
+t2.start()
+t3.start()
