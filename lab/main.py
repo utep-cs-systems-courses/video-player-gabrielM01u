@@ -61,7 +61,7 @@ class PCQueue():
     def push(self, frame):
         self.empty.acquire()
         self.lock.acquire()
-        self.buffer.append(frame)
+        self.queue.append(frame)
         self.lock.release()
         self.full.release()
 
