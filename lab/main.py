@@ -2,7 +2,7 @@ import os,time,cv2
 from threading import Thread, Semaphore,Lock
 
 count = 0
-fileName = 'clip.mp4'
+fileName = '../clip.mp4'
 
 def extract_frames(in_q, out_q):
     vidcap = cv2.VideoCapture(fileName)
@@ -15,8 +15,24 @@ def extract_frames(in_q, out_q):
         count += 1
 
 def convert_frames(in_q, out_q):
-    frame = in_q.pop()
 
+    while True:
+        frame = in_q.pop()
+        if frame is None:
+            out_q.push(None)
+            break
+        conv_f = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        out_q.push(conv_f)
+
+
+def disply_frames(out_q):
+    while True:
+        frame = out_q.pop()
+    # display the image in a window called "video" and wait 42ms
+        cv2.imshow('Video', frame)
+        if cv2.waitKey(42) and 0xFF == ord("q"):
+            break
+    cv2.destroyAllWindows()
 
 
 class PCQueue():
