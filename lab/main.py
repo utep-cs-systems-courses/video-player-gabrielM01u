@@ -9,14 +9,14 @@ fileName = '../clip.mp4'
 def extract_frames(in_q):
     count = 0
     vidcap = cv2.VideoCapture(fileName)
-    
+
     while True:
         success, image = vidcap.read() 
         in_q.push(image)
 
         print("Extracted frame# " + str(count))
 
-        if success and count < 99:
+        if success and count > 99:
             break
         count += 1
     in_q.push(None)
@@ -41,11 +41,12 @@ def disply_frames(out_q):
     count = 0
     while True:
         frame = out_q.pop()
-        cv2.imshow('Video', frame)
-        print("Displaying frame# " + str(count))
-        if cv2.waitKey(42) and 0xFF == ord("q"):
-            break
-        count += 1
+        if frame is not None:
+            cv2.imshow('Video', frame)
+            print("Displaying frame# " + str(count))
+            if cv2.waitKey(42) and 0xFF == ord("q"):
+                break
+            count += 1
     cv2.destroyAllWindows()
     print("Display finished")
 
@@ -55,7 +56,7 @@ class PCQueue():
     def __init__(self, cap):
         self.full = Semaphore(0)
         self.empty = Semaphore(cap)
-        self.queue = list() 
+        self.queue = []
         self.lock = Lock()
 
     def push(self, frame):
